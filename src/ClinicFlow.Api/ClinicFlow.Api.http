@@ -1,0 +1,35 @@
+@baseUrl = http://localhost:5080
+
+### 1. Register a patient (201 Created)
+# @name createPatient
+POST {{baseUrl}}/api/patients
+Content-Type: application/json
+
+{
+  "firstName": "Aisha",
+  "lastName": "Rahman",
+  "dateOfBirth": "1990-04-12",
+  "email": "aisha.rahman@example.com",
+  "phoneNumber": "+966500000001"
+}
+
+### 2. Invalid request (400 with validation errors)
+POST {{baseUrl}}/api/patients
+Content-Type: application/json
+
+{
+  "firstName": "",
+  "lastName": "Rahman",
+  "dateOfBirth": "2099-01-01",
+  "email": "not-an-email",
+  "phoneNumber": "12"
+}
+
+### 3. Get the patient created in request 1 (200 OK)
+GET {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}
+
+### 4. Unknown id (404 Not Found)
+GET {{baseUrl}}/api/patients/00000000-0000-0000-0000-000000000000
+
+### 5. List patients
+GET {{baseUrl}}/api/patients?page=1&pageSize=10

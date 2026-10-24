@@ -1,0 +1,22 @@
+## .NET build output
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+## Secrets and local settings
+appsettings.*.local.json
+*.pfx
+*.p12
+
+## Test results
+TestResults/
+*.trx
