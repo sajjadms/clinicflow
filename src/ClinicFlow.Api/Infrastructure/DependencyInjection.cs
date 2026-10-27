@@ -9,11 +9,14 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // In-memory for now; Video 2 swaps this for SQL Server using configuration.
+        // In-memory for now; the JWT video swaps this for SQL Server using configuration.
         services.AddDbContext<ClinicFlowDbContext>(options =>
             options.UseInMemoryDatabase("ClinicFlow"));
 
         services.AddProblemDetails();
+
+        // .NET 10 built-in validation for minimal API parameters (DataAnnotations, e.g. on ListPatientsRequest).
+        services.AddValidation();
         services.AddExceptionHandler<GlobalExceptionHandler>();
 
         return services;

@@ -33,3 +33,58 @@ GET {{baseUrl}}/api/patients/00000000-0000-0000-0000-000000000000
 
 ### 5. List patients
 GET {{baseUrl}}/api/patients?page=1&pageSize=10
+
+### 6. Update the patient from request 1 (200 OK)
+PUT {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "firstName": "Aisha",
+  "lastName": "Rahman-Khan",
+  "dateOfBirth": "1990-04-12",
+  "email": "aisha.khan@example.com",
+  "phoneNumber": "+966500000002"
+}
+
+### 7. Update with invalid data (400 with validation errors)
+PUT {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "firstName": "",
+  "lastName": "Rahman",
+  "dateOfBirth": "2099-01-01",
+  "email": "not-an-email",
+  "phoneNumber": "12"
+}
+
+### 8. Generate a file number (200 OK, e.g. CF-2026-000001)
+POST {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/file-number
+
+### 9. Generate again (409 Conflict: already assigned)
+POST {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/file-number
+
+### 10. Deactivate the patient (204 No Content); the header records who did it
+POST {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/deactivate
+X-Requested-By: reception.desk
+
+### 11. List hides deactivated patients; add includeInactive=true to see them
+GET {{baseUrl}}/api/patients?includeInactive=true
+
+### 12. Delete the patient (204 No Content)
+DELETE {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}
+
+### 13. Delete an unknown id (404 Not Found)
+DELETE {{baseUrl}}/api/patients/00000000-0000-0000-0000-000000000000
+
+### 14. Change only the phone number (PATCH, 200 OK)
+# Run requests 1 and 6 again first, since request 12 deleted the patient.
+PATCH {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/phone-number
+Content-Type: application/json
+
+{
+  "phoneNumber": "+966500000003"
+}
+
+### 15. pageSize above 100 (400 from the built-in .NET 10 validation)
+GET {{baseUrl}}/api/patients?page=1&pageSize=500

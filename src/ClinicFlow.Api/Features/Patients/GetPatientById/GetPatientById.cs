@@ -13,6 +13,7 @@ public sealed class GetPatientByIdHandler(ClinicFlowDbContext db)
     {
         var patient = await db.Patients
             .AsNoTracking()
+            .IncludingInactive()
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
         return patient?.ToResponse();

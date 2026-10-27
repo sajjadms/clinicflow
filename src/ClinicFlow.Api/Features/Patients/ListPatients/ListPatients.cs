@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ClinicFlow.Api.Features.Patients.ListPatients;
 
-public sealed record ListPatientsQuery(int Page, int PageSize) : IRequest<IReadOnlyList<PatientResponse>>;
+public sealed record ListPatientsQuery(int Page, int PageSize, bool IncludeInactive = false) : IRequest<IReadOnlyList<PatientResponse>>;
 
 public sealed class ListPatientsHandler(ClinicFlowDbContext db)
     : IRequestHandler<ListPatientsQuery, IReadOnlyList<PatientResponse>>
@@ -16,8 +16,14 @@ public sealed class ListPatientsHandler(ClinicFlowDbContext db)
         var page = Math.Max(request.Page, 1);
         var pageSize = Math.Clamp(request.PageSize, 1, MaxPageSize);
 
-        var patients = await db.Patients
-            .AsNoTracking()
+        var query = db.Patients.AsNoTracking();
+
+        if (request.IncludeInactive)
+        {
+            query = query.IncludingInactive();
+        }
+
+        var patients = await query
             .OrderBy(p => p.LastName)
             .ThenBy(p => p.FirstName)
             .Skip((page - 1) * pageSize)
