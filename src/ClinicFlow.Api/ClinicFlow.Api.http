@@ -7,10 +7,26 @@ Content-Type: application/json
 
 {
   "firstName": "Aisha",
+  "middleName": "Noor",
   "lastName": "Rahman",
   "dateOfBirth": "1990-04-12",
+  "gender": "Female",
+  "maritalStatus": "Married",
+  "nationalityCode": "IN",
+  "identityType": "Passport",
+  "identityNumber": "P1234567",
+  "mobileNumber": "+919800000001",
   "email": "aisha.rahman@example.com",
-  "phoneNumber": "+966500000001"
+  "address": {
+    "line1": "12 MG Road",
+    "line2": "Flat 4B",
+    "city": "Bengaluru",
+    "region": "Karnataka",
+    "postalCode": "560001"
+  },
+  "occupation": "Teacher",
+  "educationLevel": "Master",
+  "religion": "Islam"
 }
 
 ### 2. Invalid request (400 with validation errors)
@@ -21,70 +37,136 @@ Content-Type: application/json
   "firstName": "",
   "lastName": "Rahman",
   "dateOfBirth": "2099-01-01",
-  "email": "not-an-email",
-  "phoneNumber": "12"
+  "maritalStatus": "Single",
+  "nationalityCode": "XX",
+  "identityType": "Passport",
+  "identityNumber": "P 123",
+  "mobileNumber": "12345",
+  "address": { "line1": "", "city": "Bengaluru" }
 }
 
-### 3. Get the patient created in request 1 (200 OK)
+### 3. A child without a guardian (400: guardian required under 18)
+POST {{baseUrl}}/api/patients
+Content-Type: application/json
+
+{
+  "firstName": "Zayd",
+  "lastName": "Rahman",
+  "dateOfBirth": "2018-09-01",
+  "gender": "Male",
+  "maritalStatus": "Single",
+  "nationalityCode": "IN",
+  "identityType": "NationalId",
+  "identityNumber": "IN-5566778899",
+  "mobileNumber": "+919800000002",
+  "address": { "line1": "12 MG Road", "city": "Bengaluru" }
+}
+
+### 4. The same child with a guardian (201 Created)
+# @name createChild
+POST {{baseUrl}}/api/patients
+Content-Type: application/json
+
+{
+  "firstName": "Zayd",
+  "lastName": "Rahman",
+  "dateOfBirth": "2018-09-01",
+  "gender": "Male",
+  "maritalStatus": "Single",
+  "nationalityCode": "IN",
+  "identityType": "NationalId",
+  "identityNumber": "IN-5566778899",
+  "mobileNumber": "+919800000002",
+  "address": { "line1": "12 MG Road", "city": "Bengaluru" },
+  "guardian": {
+    "fullName": "Aisha Noor Rahman",
+    "relationship": "Mother",
+    "mobileNumber": "+919800000001"
+  }
+}
+
+### 5. Same passport number again (409 Conflict from the unique index)
+POST {{baseUrl}}/api/patients
+Content-Type: application/json
+
+{
+  "firstName": "Someone",
+  "lastName": "Else",
+  "dateOfBirth": "1985-01-01",
+  "gender": "Male",
+  "maritalStatus": "Single",
+  "nationalityCode": "GB",
+  "identityType": "Passport",
+  "identityNumber": "P1234567",
+  "mobileNumber": "+447700900001",
+  "address": { "line1": "1 High Street", "city": "London" }
+}
+
+### 6. Get the patient created in request 1 (200 OK, nationality joined from its table)
 GET {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}
 
-### 4. Unknown id (404 Not Found)
+### 7. Unknown id (404 Not Found)
 GET {{baseUrl}}/api/patients/00000000-0000-0000-0000-000000000000
 
-### 5. List patients
+### 8. List patients
 GET {{baseUrl}}/api/patients?page=1&pageSize=10
 
-### 6. Update the patient from request 1 (200 OK)
+### 9. Nationalities lookup (the codes the patient endpoints accept)
+GET {{baseUrl}}/api/nationalities
+
+### 10. Update the patient from request 1 (200 OK)
 PUT {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}
 Content-Type: application/json
 
 {
   "firstName": "Aisha",
+  "middleName": "Noor",
   "lastName": "Rahman-Khan",
   "dateOfBirth": "1990-04-12",
+  "gender": "Female",
+  "maritalStatus": "Married",
+  "nationalityCode": "IN",
+  "identityType": "Passport",
+  "identityNumber": "P1234567",
+  "mobileNumber": "+919800000003",
   "email": "aisha.khan@example.com",
-  "phoneNumber": "+966500000002"
+  "address": {
+    "line1": "45 Residency Road",
+    "city": "Bengaluru",
+    "region": "Karnataka",
+    "postalCode": "560025"
+  },
+  "occupation": "Head Teacher",
+  "educationLevel": "Master",
+  "religion": "Islam"
 }
 
-### 7. Update with invalid data (400 with validation errors)
-PUT {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}
+### 11. Change only the mobile number (PATCH, 200 OK)
+PATCH {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/mobile-number
 Content-Type: application/json
 
 {
-  "firstName": "",
-  "lastName": "Rahman",
-  "dateOfBirth": "2099-01-01",
-  "email": "not-an-email",
-  "phoneNumber": "12"
+  "mobileNumber": "+919800000004"
 }
 
-### 8. Generate a file number (200 OK, e.g. CF-2026-000001)
+### 12. Generate a file number (200 OK, e.g. CF-2026-000001)
 POST {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/file-number
 
-### 9. Generate again (409 Conflict: already assigned)
+### 13. Generate again (409 Conflict: already assigned)
 POST {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/file-number
 
-### 10. Deactivate the patient (204 No Content); the header records who did it
+### 14. Deactivate the patient (204 No Content); the header records who did it
 POST {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/deactivate
 X-Requested-By: reception.desk
 
-### 11. List hides deactivated patients; add includeInactive=true to see them
+### 15. List hides deactivated patients; add includeInactive=true to see them
 GET {{baseUrl}}/api/patients?includeInactive=true
 
-### 12. Delete the patient (204 No Content)
-DELETE {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}
+### 16. Delete the child from request 4 (204 No Content)
+DELETE {{baseUrl}}/api/patients/{{createChild.response.body.$.id}}
 
-### 13. Delete an unknown id (404 Not Found)
+### 17. Delete an unknown id (404 Not Found)
 DELETE {{baseUrl}}/api/patients/00000000-0000-0000-0000-000000000000
 
-### 14. Change only the phone number (PATCH, 200 OK)
-# Run requests 1 and 6 again first, since request 12 deleted the patient.
-PATCH {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/phone-number
-Content-Type: application/json
-
-{
-  "phoneNumber": "+966500000003"
-}
-
-### 15. pageSize above 100 (400 from the built-in .NET 10 validation)
+### 18. pageSize above 100 (400 from the built-in .NET 10 validation)
 GET {{baseUrl}}/api/patients?page=1&pageSize=500

@@ -23,13 +23,13 @@ public sealed class ListPatientsHandler(ClinicFlowDbContext db)
             query = query.IncludingInactive();
         }
 
-        var patients = await query
+        // Sort, page, then project: the JOIN to Nationalities happens in SQL, one round trip.
+        return await query
             .OrderBy(p => p.LastName)
             .ThenBy(p => p.FirstName)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .Select(PatientProjections.ToResponse)
             .ToListAsync(cancellationToken);
-
-        return patients.Select(p => p.ToResponse()).ToList();
     }
 }

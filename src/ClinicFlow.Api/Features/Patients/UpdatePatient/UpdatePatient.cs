@@ -4,31 +4,36 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ClinicFlow.Api.Features.Patients.UpdatePatient;
 
-// Body of PUT /api/patients/{id}; the id comes from the route.
+// Body of PUT /api/patients/{id}; the id comes from the route. PUT replaces every field.
 public sealed record UpdatePatientRequest(
     string FirstName,
+    string? MiddleName,
     string LastName,
     DateOnly DateOfBirth,
-    string Email,
-    string PhoneNumber)
+    Gender Gender,
+    MaritalStatus MaritalStatus,
+    string? NationalityCode,
+    IdentityType IdentityType,
+    string IdentityNumber,
+    string MobileNumber,
+    string? Email,
+    AddressDto Address,
+    GuardianDto? Guardian,
+    string? Occupation,
+    EducationLevel? EducationLevel,
+    Religion? Religion) : IPatientDetails
 {
-    public UpdatePatientCommand ToCommand(Guid id) =>
-        new(id, FirstName, LastName, DateOfBirth, Email, PhoneNumber);
+    public UpdatePatientCommand ToCommand(Guid id) => new(id, this);
 }
 
-public sealed record UpdatePatientCommand(
-    Guid Id,
-    string FirstName,
-    string LastName,
-    DateOnly DateOfBirth,
-    string Email,
-    string PhoneNumber) : IRequest<PatientResponse?>;
+public sealed record UpdatePatientCommand(Guid Id, IPatientDetails Details) : IRequest<PatientResponse?>;
 
 public sealed class UpdatePatientHandler(ClinicFlowDbContext db)
     : IRequestHandler<UpdatePatientCommand, PatientResponse?>
 {
     public async Task<PatientResponse?> Handle(UpdatePatientCommand request, CancellationToken cancellationToken)
     {
+        // Load: IncludingInactive means we can update a deactivated patient too.
         var patient = await db.Patients
             .IncludingInactive()
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
@@ -38,15 +43,20 @@ public sealed class UpdatePatientHandler(ClinicFlowDbContext db)
             return null;
         }
 
-        patient.FirstName = request.FirstName.Trim();
-        patient.LastName = request.LastName.Trim();
-        patient.DateOfBirth = request.DateOfBirth;
-        patient.Email = request.Email.Trim().ToLowerInvariant();
-        patient.PhoneNumber = request.PhoneNumber.Trim();
+        var nationalityId = await ResolveNationalityIdAsync(request.Details.NationalityCode, cancellationToken);
+
+        // Update every field, then save.
+        patient.Apply(request.Details, nationalityId);
         patient.UpdatedAtUtc = DateTime.UtcNow;
 
         await db.SaveChangesAsync(cancellationToken);
 
-        return patient.ToResponse();
+        return await db.GetPatientResponseAsync(patient.Id, cancellationToken);
     }
+
+    // The validator already checked the code exists; here we turn it into the foreign key (or null).
+    private async Task<int?> ResolveNationalityIdAsync(string? code, CancellationToken ct) =>
+        string.IsNullOrWhiteSpace(code)
+            ? null
+            : await db.Nationalities.Where(n => n.Code == code.ToUpper()).Select(n => (int?)n.Id).SingleAsync(ct);
 }

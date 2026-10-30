@@ -31,11 +31,11 @@ public sealed class GenerateFileNoHandler(ClinicFlowDbContext db)
 
         if (patient.FileNo is not null)
         {
-            return new(GenerateFileNoStatus.AlreadyAssigned, patient.ToResponse());
+            return new(GenerateFileNoStatus.AlreadyAssigned, await db.GetPatientResponseAsync(patient.Id, cancellationToken));
         }
 
         // File numbers look like CF-2026-000001 and restart every year.
-        // With SQL Server we will use a database sequence so two requests can never get the same number.
+        // The unique index on FileNo stops duplicates; a database sequence comes in the EF Core video.
         var prefix = $"CF-{DateTime.UtcNow.Year}-";
 
         var lastFileNo = await db.Patients
@@ -52,6 +52,6 @@ public sealed class GenerateFileNoHandler(ClinicFlowDbContext db)
 
         await db.SaveChangesAsync(cancellationToken);
 
-        return new(GenerateFileNoStatus.Generated, patient.ToResponse());
+        return new(GenerateFileNoStatus.Generated, await db.GetPatientResponseAsync(patient.Id, cancellationToken));
     }
 }

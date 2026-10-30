@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using ClinicFlow.Api.Infrastructure.ErrorHandling;
 using ClinicFlow.Api.Infrastructure.Persistence;
 using Microsoft.AspNetCore.OpenApi;
@@ -9,9 +10,18 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // In-memory for now; the JWT video swaps this for SQL Server using configuration.
+        // The connection string is never committed: in development it comes from dotnet user-secrets,
+        // in production from an environment variable (ConnectionStrings__ClinicFlow).
+        var connectionString = configuration.GetConnectionString("ClinicFlow")
+            ?? throw new InvalidOperationException(
+                "Connection string 'ClinicFlow' is missing. Set it with: dotnet user-secrets set \"ConnectionStrings:ClinicFlow\" \"...\"");
+
         services.AddDbContext<ClinicFlowDbContext>(options =>
-            options.UseInMemoryDatabase("ClinicFlow"));
+            options.UseSqlServer(connectionString));
+
+        // Enums travel as names in JSON: "gender": "Female", not 2.
+        services.ConfigureHttpJsonOptions(options =>
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         services.AddProblemDetails();
 

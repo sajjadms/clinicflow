@@ -1,3 +1,4 @@
+using ClinicFlow.Api.Features.Nationalities;
 using ClinicFlow.Api.Features.Patients;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,11 +8,22 @@ public sealed class ClinicFlowDbContext(DbContextOptions<ClinicFlowDbContext> op
 {
     public DbSet<Patient> Patients => Set<Patient>();
 
+    public DbSet<Nationality> Nationalities => Set<Nationality>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Named query filter (EF Core 10): every query skips deactivated patients
-        // unless it opts out with IgnoreQueryFilters([PatientFilters.ActiveOnly]).
-        modelBuilder.Entity<Patient>()
-            .HasQueryFilter(PatientFilters.ActiveOnly, p => p.IsActive);
+        // Picks up every IEntityTypeConfiguration<T> in this project (Configurations folder).
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ClinicFlowDbContext).Assembly);
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        // Store enums as readable text ("Female"), not numbers, in every table.
+        configurationBuilder.Properties<Gender>().HaveConversion<string>().HaveMaxLength(20);
+        configurationBuilder.Properties<MaritalStatus>().HaveConversion<string>().HaveMaxLength(20);
+        configurationBuilder.Properties<IdentityType>().HaveConversion<string>().HaveMaxLength(20);
+        configurationBuilder.Properties<GuardianRelationship>().HaveConversion<string>().HaveMaxLength(20);
+        configurationBuilder.Properties<EducationLevel>().HaveConversion<string>().HaveMaxLength(20);
+        configurationBuilder.Properties<Religion>().HaveConversion<string>().HaveMaxLength(20);
     }
 }
