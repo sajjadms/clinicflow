@@ -11,6 +11,7 @@ src/ClinicFlow.Api/
 ├── Program.cs                 services in, pipeline out, endpoints mapped
 ├── Features/                  one folder per business capability
 │   ├── FeatureExtensions.cs   AddFeatures() + MapFeatureEndpoints()
+│   ├── Auth/                  users, register, login (JWT), GET /api/auth/me
 │   ├── Nationalities/         ISO 3166-1 lookup table (seeded) + GET /api/nationalities
 │   └── Patients/
 │       ├── Patient.cs                 entity (+ Address and Guardian complex types)
@@ -29,6 +30,7 @@ src/ClinicFlow.Api/
 │       └── ChangeMobileNumber/        partial update (PATCH .../mobile-number)
 └── Infrastructure/            shared plumbing used by every feature
     ├── DependencyInjection.cs
+    ├── Auth/                  JWT options, token service, JWT bearer setup, OpenAPI Bearer scheme
     ├── Endpoints/             IEndpoint: one endpoint class per use case, auto-registered
     ├── Logging/               request timing endpoint filter (route group level)
     ├── Persistence/           EF Core DbContext, entity configurations, migrations
@@ -44,6 +46,7 @@ When the app grows, the slices move into an Application project and the rest int
 - MediatR 12 (request/handler per use case)
 - FluentValidation 12 (endpoint filter)
 - EF Core 10 with SQL Server (migrations, complex types, a named query filter for active patients)
+- JWT bearer authentication (`Microsoft.AspNetCore.Authentication.JwtBearer`), passwords hashed with `PasswordHasher<T>`
 - Built-in OpenAPI document (`Microsoft.AspNetCore.OpenApi`, OpenAPI 3.1) with Swagger UI
 
 ## Run
@@ -53,11 +56,18 @@ Set the connection string once (it is never committed), create the database, the
 ```bash
 dotnet tool restore
 dotnet user-secrets set "ConnectionStrings:ClinicFlow" "Server=localhost;Database=ClinicFlow;Trusted_Connection=True;TrustServerCertificate=True" --project src/ClinicFlow.Api
+dotnet user-secrets set "Jwt:SigningKey" "<a random secret, at least 32 characters>" --project src/ClinicFlow.Api
 dotnet ef database update --project src/ClinicFlow.Api
 dotnet run --project src/ClinicFlow.Api
 ```
 
 No SQL Server on your machine? Run one in Docker (`mcr.microsoft.com/mssql/server`) and use a SQL login in the connection string.
+
+Generate a signing key with `openssl rand -base64 48` (or PowerShell: `[Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Max 256 }) -as [byte[]])`). The app refuses to start without it.
+
+### Authentication
+
+The patient endpoints need a JWT. Register with `POST /api/auth/register`, log in with `POST /api/auth/login`, and send the returned `accessToken` as `Authorization: Bearer <token>`. `GET /api/nationalities` stays public. Tokens expire after `Jwt:ExpiryMinutes` (60 by default); refresh tokens come in a later video.
 
 Swagger UI: http://localhost:5080/swagger. OpenAPI document: http://localhost:5080/openapi/v1.json. Sample requests: `src/ClinicFlow.Api/ClinicFlow.Api.http`.
 

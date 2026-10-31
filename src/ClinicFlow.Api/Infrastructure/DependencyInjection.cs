@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using ClinicFlow.Api.Infrastructure.Auth;
 using ClinicFlow.Api.Infrastructure.ErrorHandling;
 using ClinicFlow.Api.Infrastructure.Persistence;
 using Microsoft.AspNetCore.OpenApi;
@@ -38,6 +39,8 @@ public static class DependencyInjection
     public static IServiceCollection AddApiDocs(this IServiceCollection services)
     {
         services.AddOpenApi(options =>
+        {
+            options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
             options.AddDocumentTransformer((document, context, cancellationToken) =>
             {
                 document.Info = new()
@@ -48,7 +51,8 @@ public static class DependencyInjection
                 };
 
                 return Task.CompletedTask;
-            }));
+            });
+        });
 
         return services;
     }

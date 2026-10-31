@@ -1,11 +1,13 @@
 using ClinicFlow.Api.Features;
 using ClinicFlow.Api.Infrastructure;
+using ClinicFlow.Api.Infrastructure.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Services in
 builder.Services
     .AddInfrastructure(builder.Configuration)
+    .AddJwtAuthentication(builder.Configuration)
     .AddApiDocs()
     .AddFeatures();
 
@@ -24,6 +26,10 @@ else
 {
     app.UseHttpsRedirection();
 }
+
+// Who are you? (reads the Bearer token)  ->  Are you allowed?
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Endpoints mapped
 app.MapFeatureEndpoints();

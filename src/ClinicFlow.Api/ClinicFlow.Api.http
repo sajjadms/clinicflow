@@ -1,8 +1,77 @@
 @baseUrl = http://localhost:5080
+@oneExtraChar = x
+
+# ============================================================
+#  Authentication (JWT). Run A1 to A9 first, in order.
+#  A6 logs in; the requests below send its accessToken
+#  as a Bearer token (Authorization header).
+# ============================================================
+
+### A1. List patients without a token (401 Unauthorized)
+GET {{baseUrl}}/api/patients
+
+### A2. Nationalities stay public (200 OK, no token needed)
+GET {{baseUrl}}/api/nationalities
+
+### A3. Register a user (201 Created; the password is never returned)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "sara.ahmed@example.com",
+  "fullName": "Sara Ahmed",
+  "password": "Clinic2026!"
+}
+
+### A4. Same email again (409 Conflict)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "sara.ahmed@example.com",
+  "fullName": "Sara Ahmed",
+  "password": "Clinic2026!"
+}
+
+### A5. Wrong password (401: invalid email or password)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "sara.ahmed@example.com",
+  "password": "WrongPassword1"
+}
+
+### A6. Log in (200 OK with the access token)
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "sara.ahmed@example.com",
+  "password": "Clinic2026!"
+}
+
+### A7. List patients with the token (200 OK)
+GET {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### A8. Who am I? Read from the token claims (200 OK)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### A9. Tampered token: one extra character (401, the signature no longer matches)
+GET {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}{{oneExtraChar}}
+
+### ===========================================================
+#  Patients (all need the token from A6)
+# ============================================================
 
 ### 1. Register a patient (201 Created)
 # @name createPatient
 POST {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -31,6 +100,7 @@ Content-Type: application/json
 
 ### 2. Invalid request (400 with validation errors)
 POST {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -47,6 +117,7 @@ Content-Type: application/json
 
 ### 3. A child without a guardian (400: guardian required under 18)
 POST {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -65,6 +136,7 @@ Content-Type: application/json
 ### 4. The same child with a guardian (201 Created)
 # @name createChild
 POST {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -87,6 +159,7 @@ Content-Type: application/json
 
 ### 5. Same passport number again (409 Conflict from the unique index)
 POST {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -104,18 +177,22 @@ Content-Type: application/json
 
 ### 6. Get the patient created in request 1 (200 OK, nationality joined from its table)
 GET {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### 7. Unknown id (404 Not Found)
 GET {{baseUrl}}/api/patients/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### 8. List patients
 GET {{baseUrl}}/api/patients?page=1&pageSize=10
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### 9. Nationalities lookup (the codes the patient endpoints accept)
 GET {{baseUrl}}/api/nationalities
 
 ### 10. Update the patient from request 1 (200 OK)
 PUT {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -143,6 +220,7 @@ Content-Type: application/json
 
 ### 11. Change only the mobile number (PATCH, 200 OK)
 PATCH {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/mobile-number
+Authorization: Bearer {{login.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -151,22 +229,29 @@ Content-Type: application/json
 
 ### 12. Generate a file number (200 OK, e.g. CF-2026-000001)
 POST {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/file-number
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### 13. Generate again (409 Conflict: already assigned)
 POST {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/file-number
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### 14. Deactivate the patient (204 No Content); the header records who did it
 POST {{baseUrl}}/api/patients/{{createPatient.response.body.$.id}}/deactivate
+Authorization: Bearer {{login.response.body.$.accessToken}}
 X-Requested-By: reception.desk
 
 ### 15. List hides deactivated patients; add includeInactive=true to see them
 GET {{baseUrl}}/api/patients?includeInactive=true
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### 16. Delete the child from request 4 (204 No Content)
 DELETE {{baseUrl}}/api/patients/{{createChild.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### 17. Delete an unknown id (404 Not Found)
 DELETE {{baseUrl}}/api/patients/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### 18. pageSize above 100 (400 from the built-in .NET 10 validation)
 GET {{baseUrl}}/api/patients?page=1&pageSize=500
+Authorization: Bearer {{login.response.body.$.accessToken}}

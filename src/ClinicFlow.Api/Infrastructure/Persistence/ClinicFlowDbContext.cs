@@ -1,3 +1,4 @@
+using ClinicFlow.Api.Features.Auth;
 using ClinicFlow.Api.Features.Nationalities;
 using ClinicFlow.Api.Features.Patients;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,8 @@ public sealed class ClinicFlowDbContext(DbContextOptions<ClinicFlowDbContext> op
     public DbSet<Patient> Patients => Set<Patient>();
 
     public DbSet<Nationality> Nationalities => Set<Nationality>();
+
+    public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -25,7 +25,7 @@ public sealed class GlobalExceptionHandler(
         {
             BadHttpRequestException badRequest => (badRequest.StatusCode, "The request is invalid."),
             DbUpdateException { InnerException: SqlException sql } when DuplicateKeyErrors.Contains(sql.Number)
-                => (StatusCodes.Status409Conflict, "A patient with the same unique value already exists."),
+                => (StatusCodes.Status409Conflict, "A record with the same unique value already exists."),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
         };
 
