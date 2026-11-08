@@ -1,4 +1,5 @@
 using ClinicFlow.Api.Infrastructure.Endpoints;
+using ClinicFlow.Api.Features.Patients.FileNumbers;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -16,6 +17,9 @@ public static class FeatureExtensions
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
         services.AddValidatorsFromAssembly(assembly);
+
+        // Stateless helper: Transient, a new instance for every consumer.
+        services.AddTransient<IFileNoGenerator, FileNoGenerator>();
 
         var endpoints = assembly.DefinedTypes
             .Where(type => type is { IsAbstract: false, IsInterface: false } && type.IsAssignableTo(typeof(IEndpoint)))

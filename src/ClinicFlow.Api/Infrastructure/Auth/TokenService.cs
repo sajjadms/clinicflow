@@ -10,12 +10,12 @@ namespace ClinicFlow.Api.Infrastructure.Auth;
 public sealed record AccessToken(string Value, DateTime ExpiresAtUtc);
 
 /// <summary>Creates the signed JWT that login returns.</summary>
-public sealed class TokenService(IOptions<JwtOptions> options)
+public sealed class TokenService(IOptions<JwtOptions> options, TimeProvider clock)
 {
     public AccessToken CreateToken(User user)
     {
         var jwt = options.Value;
-        var now = DateTime.UtcNow;
+        var now = clock.GetUtcNow().UtcDateTime;
         var expiresAt = now.AddMinutes(jwt.ExpiryMinutes);
 
         // Payload: who the user is. Readable by anyone, so no secrets in here.

@@ -48,6 +48,10 @@ public static class AuthExtensions
         services.AddSingleton<TokenService>();
         services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 
+        // Who is calling? Scoped: one per request, built from the request's JWT.
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUser, CurrentUser>();
+
         return services;
     }
 }

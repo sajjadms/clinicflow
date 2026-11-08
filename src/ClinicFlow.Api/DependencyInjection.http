@@ -1,0 +1,49 @@
+@baseUrl = http://localhost:5080
+
+# =============================================================
+#  Dependency injection: Singleton vs Scoped vs Transient
+#  Start the API (F5), then send these requests in order.
+# =============================================================
+
+### DI1. Log in (200 OK with the access token)
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "sara.ahmed@example.com",
+  "password": "Clinic2026!"
+}
+
+### DI2. Register a patient (201 Created; random passport so it never clashes)
+# @name newPatient
+POST {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Imran",
+  "lastName": "Qureshi",
+  "dateOfBirth": "1987-09-03",
+  "gender": "Male",
+  "maritalStatus": "Married",
+  "nationalityCode": "IN",
+  "identityType": "Passport",
+  "identityNumber": "P{{$randomInt 1000000 9999999}}",
+  "mobileNumber": "+9198{{$randomInt 10000000 99999999}}",
+  "address": { "line1": "5 Charminar Road", "city": "Hyderabad" }
+}
+
+### DI3. Transient: FileNoGenerator builds the file number (200 OK, CF-2026-...)
+POST {{baseUrl}}/api/patients/{{newPatient.response.body.$.id}}/file-number
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### DI4. Scoped: ICurrentUser fills DeactivatedBy from the token (204 No Content)
+POST {{baseUrl}}/api/patients/{{newPatient.response.body.$.id}}/deactivate
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### L1. Instance ids per lifetime (send it twice and compare)
+# singleton: the same in every response, until the app restarts
+# scoped:    the same for endpoint and reporter (one request), new on the next request
+# transient: different for endpoint and reporter, and new on every request
+GET {{baseUrl}}/api/diagnostics/lifetimes

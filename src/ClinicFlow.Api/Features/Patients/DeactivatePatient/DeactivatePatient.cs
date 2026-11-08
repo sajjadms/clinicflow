@@ -1,3 +1,4 @@
+using ClinicFlow.Api.Infrastructure.Auth;
 using ClinicFlow.Api.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -5,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 namespace ClinicFlow.Api.Features.Patients.DeactivatePatient;
 
 // Soft delete: the record stays for history. Returns false when the patient does not exist.
-public sealed record DeactivatePatientCommand(Guid Id, string? DeactivatedBy) : IRequest<bool>;
+public sealed record DeactivatePatientCommand(Guid Id) : IRequest<bool>;
 
-public sealed class DeactivatePatientHandler(ClinicFlowDbContext db)
+public sealed class DeactivatePatientHandler(ClinicFlowDbContext db, ICurrentUser currentUser, TimeProvider clock)
     : IRequestHandler<DeactivatePatientCommand, bool>
 {
     public async Task<bool> Handle(DeactivatePatientCommand request, CancellationToken cancellationToken)
@@ -25,9 +26,10 @@ public sealed class DeactivatePatientHandler(ClinicFlowDbContext db)
         if (patient.IsActive)
         {
             patient.IsActive = false;
-            patient.DeactivatedAtUtc = DateTime.UtcNow;
-            patient.DeactivatedBy = request.DeactivatedBy?.Trim();
-            patient.UpdatedAtUtc = DateTime.UtcNow;
+            var now = clock.GetUtcNow().UtcDateTime;
+            patient.DeactivatedAtUtc = now;
+            patient.DeactivatedBy = currentUser.Email;   // from the signed-in user's token, not from the client
+            patient.UpdatedAtUtc = now;
 
             await db.SaveChangesAsync(cancellationToken);
         }

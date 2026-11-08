@@ -1,3 +1,4 @@
+using ClinicFlow.Api.Features.Patients.FileNumbers;
 using ClinicFlow.Api.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ public enum GenerateFileNoStatus
 
 public sealed record GenerateFileNoResult(GenerateFileNoStatus Status, PatientResponse? Patient = null);
 
-public sealed class GenerateFileNoHandler(ClinicFlowDbContext db)
+public sealed class GenerateFileNoHandler(ClinicFlowDbContext db, IFileNoGenerator fileNos, TimeProvider clock)
     : IRequestHandler<GenerateFileNoCommand, GenerateFileNoResult>
 {
     public async Task<GenerateFileNoResult> Handle(GenerateFileNoCommand request, CancellationToken cancellationToken)
@@ -34,21 +35,8 @@ public sealed class GenerateFileNoHandler(ClinicFlowDbContext db)
             return new(GenerateFileNoStatus.AlreadyAssigned, await db.GetPatientResponseAsync(patient.Id, cancellationToken));
         }
 
-        // File numbers look like CF-2026-000001 and restart every year.
-        // The unique index on FileNo stops duplicates; a database sequence comes in the EF Core video.
-        var prefix = $"CF-{DateTime.UtcNow.Year}-";
-
-        var lastFileNo = await db.Patients
-            .IncludingInactive()
-            .Where(p => p.FileNo != null && p.FileNo.StartsWith(prefix))
-            .OrderByDescending(p => p.FileNo)
-            .Select(p => p.FileNo)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        var next = lastFileNo is null ? 1 : int.Parse(lastFileNo[prefix.Length..]) + 1;
-
-        patient.FileNo = $"{prefix}{next:D6}";
-        patient.UpdatedAtUtc = DateTime.UtcNow;
+        patient.FileNo = await fileNos.NextAsync(cancellationToken);
+        patient.UpdatedAtUtc = clock.GetUtcNow().UtcDateTime;
 
         await db.SaveChangesAsync(cancellationToken);
 

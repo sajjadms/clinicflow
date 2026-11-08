@@ -30,6 +30,10 @@ public static class DependencyInjection
         services.AddValidation();
         services.AddExceptionHandler<GlobalExceptionHandler>();
 
+        // One clock for the whole app: Singleton. Handlers ask TimeProvider for "now" instead of DateTime.UtcNow,
+        // so tests can swap in a fake clock.
+        services.AddSingleton(TimeProvider.System);
+
         return services;
     }
 

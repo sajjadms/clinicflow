@@ -1,0 +1,84 @@
+@baseUrl = http://localhost:5080
+
+# ============================================================
+#  Debugging tips in Visual Studio 2026
+#  Start the API with F5, then send these requests.
+# ============================================================
+
+### D1. Log in (200 OK with the access token)
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "sara.ahmed@example.com",
+  "password": "Clinic2026!"
+}
+
+### D2. Wrong password (401)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "sara.ahmed@example.com",
+  "password": "WrongPassword1"
+}
+
+### D3. Same user, capital letters in the email (should be 200)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "Sara.Ahmed@Example.com",
+  "password": "Clinic2026!"
+}
+
+### D4. Create a patient (201 Created)
+# @name newPatient
+POST {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Omar",
+  "lastName": "Khan",
+  "dateOfBirth": "1988-06-15",
+  "gender": "Male",
+  "maritalStatus": "Married",
+  "nationalityCode": "IN",
+  "identityType": "Passport",
+  "identityNumber": "P{{$randomInt}}",
+  "mobileNumber": "+919800000010",
+  "address": { "line1": "8 Park Street", "city": "Kolkata" }
+}
+
+### D5. Same passport as an existing patient (409 Conflict)
+POST {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Someone",
+  "lastName": "Else",
+  "dateOfBirth": "1985-01-01",
+  "gender": "Male",
+  "maritalStatus": "Single",
+  "nationalityCode": "GB",
+  "identityType": "Passport",
+  "identityNumber": "P1234567",
+  "mobileNumber": "+447700900001",
+  "address": { "line1": "1 High Street", "city": "London" }
+}
+
+### D6. Get the new patient (200 OK)
+GET {{baseUrl}}/api/patients/{{newPatient.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### D7. Deactivate the new patient (204 No Content)
+POST {{baseUrl}}/api/patients/{{newPatient.response.body.$.id}}/deactivate
+Authorization: Bearer {{login.response.body.$.accessToken}}
+X-Requested-By: reception.desk
+
+### D8. List patients (200 OK)
+GET {{baseUrl}}/api/patients?page=1&pageSize=10
+Authorization: Bearer {{login.response.body.$.accessToken}}
