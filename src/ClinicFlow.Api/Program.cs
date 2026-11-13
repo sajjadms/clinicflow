@@ -2,6 +2,7 @@ using ClinicFlow.Api.Features;
 using ClinicFlow.Api.Infrastructure;
 using ClinicFlow.Api.Infrastructure.Auth;
 using ClinicFlow.Api.Infrastructure.Diagnostics;
+using ClinicFlow.Api.Infrastructure.Http;
 using ClinicFlow.Api.Infrastructure.Logging;
 using Serilog;
 using Serilog.Debugging;
@@ -29,7 +30,8 @@ try
         .AddJwtAuthentication(builder.Configuration)
         .AddApiDocs()
         .AddFeatures()
-        .AddLifetimeDemo();
+        .AddLifetimeDemo()
+        .AddExternalApis(builder.Configuration);   // HttpClient: two outside APIs, two base URLs
 
     var app = builder.Build();
 
@@ -47,6 +49,7 @@ try
 
         app.MapLifetimeDemo();   // GET /api/diagnostics/lifetimes: Singleton vs Scoped vs Transient
         app.MapLoggingDemo();    // GET /api/diagnostics/error: an Error log on purpose
+        app.MapGatewayDemo();    // GET /api/diagnostics/gateway-status/503: watch the retries
     }
     else
     {

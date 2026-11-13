@@ -1,0 +1,53 @@
+@baseUrl = http://localhost:5080
+
+# =============================================================
+#  HttpClient in .NET 10: calling outside A-P-I's
+#  Start the API (Ctrl+F5), send each request, then watch the logs.
+#  Holidays A-P-I : https://date.nager.at/      (no key)
+#  SMS gateway    : https://postman-echo.com/   (echoes what we send)
+# =============================================================
+
+### HC1. Public holidays for the UK: 200 OK with a list
+GET {{baseUrl}}/api/holidays/2026/GB
+
+### HC2. India: the A-P-I has no data, 204 No Content
+GET {{baseUrl}}/api/holidays/2026/IN
+
+### HC3. A country code that does not exist: 404 Not Found
+GET {{baseUrl}}/api/holidays/2026/XX
+
+### HC4. Log in (the reminder endpoint needs a token)
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "sara.ahmed@example.com",
+  "password": "Clinic2026!"
+}
+
+### HC5. Register a patient
+# @name patient
+POST {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Imran",
+  "lastName": "Qureshi",
+  "dateOfBirth": "1987-09-03",
+  "gender": "Male",
+  "maritalStatus": "Married",
+  "nationalityCode": "IN",
+  "identityType": "Passport",
+  "identityNumber": "P{{$randomInt 1000000 9999999}}",
+  "mobileNumber": "+9198{{$randomInt 10000000 99999999}}",
+  "address": { "line1": "5 Charminar Road", "city": "Hyderabad" }
+}
+
+### HC6. Send a reminder SMS: see the headers and body the gateway received
+POST {{baseUrl}}/api/patients/{{patient.response.body.$.id}}/reminders
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### HC7. The gateway is down (503): watch the retries in the logs
+GET {{baseUrl}}/api/diagnostics/gateway-status/503
