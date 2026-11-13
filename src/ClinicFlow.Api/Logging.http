@@ -1,0 +1,46 @@
+@baseUrl = http://localhost:5080
+
+# =============================================================
+#  Logging with Serilog: Console, Text file and Azure Blob
+#  Start the API (F5), send each request, then watch the logs.
+# =============================================================
+
+### LG1. Log in (Information: "User ... logged in")
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "sara.ahmed@example.com",
+  "password": "Clinic2026!"
+}
+
+### LG2. Register a patient (Information: "Patient ... registered")
+POST {{baseUrl}}/api/patients
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Imran",
+  "lastName": "Qureshi",
+  "dateOfBirth": "1987-09-03",
+  "gender": "Male",
+  "maritalStatus": "Married",
+  "nationalityCode": "IN",
+  "identityType": "Passport",
+  "identityNumber": "P{{$randomInt 1000000 9999999}}",
+  "mobileNumber": "+9198{{$randomInt 10000000 99999999}}",
+  "address": { "line1": "5 Charminar Road", "city": "Hyderabad" }
+}
+
+### LG3. Wrong password (Warning: "Login failed")
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "sara.ahmed@example.com",
+  "password": "WrongPassword1"
+}
+
+### LG4. Something breaks (Error, with the full exception)
+GET {{baseUrl}}/api/diagnostics/error

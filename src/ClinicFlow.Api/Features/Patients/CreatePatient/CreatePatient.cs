@@ -22,7 +22,7 @@ public sealed record CreatePatientCommand(
     EducationLevel? EducationLevel,
     Religion? Religion) : IPatientDetails, IRequest<PatientResponse>;
 
-public sealed class CreatePatientHandler(ClinicFlowDbContext db)
+public sealed class CreatePatientHandler(ClinicFlowDbContext db, ILogger<CreatePatientHandler> logger)
     : IRequestHandler<CreatePatientCommand, PatientResponse>
 {
     public async Task<PatientResponse> Handle(CreatePatientCommand request, CancellationToken cancellationToken)
@@ -34,6 +34,11 @@ public sealed class CreatePatientHandler(ClinicFlowDbContext db)
 
         db.Patients.Add(patient);
         await db.SaveChangesAsync(cancellationToken);
+
+        // Structured log: PatientId and Nationality become searchable properties, not just text.
+        // No names, mobile or identity numbers in logs: they are personal data.
+        logger.LogInformation("Patient {PatientId} registered, nationality {Nationality}",
+            patient.Id, request.NationalityCode ?? "none");
 
         return (await db.GetPatientResponseAsync(patient.Id, cancellationToken))!;
     }

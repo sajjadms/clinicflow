@@ -1,0 +1,1 @@
+2026-11-08T12:50:07.8231637Z Serilog.Sinks.File.RollingFileSink: file target C:\AcademyWork\ClinicFlow.Api\src\ClinicFlow.Api\logs\clinicflow-20261108.txt was locked, attempting to open next in sequence (attempt 1) (Temporary, unspecified events)

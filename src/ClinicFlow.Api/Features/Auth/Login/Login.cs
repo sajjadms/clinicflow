@@ -10,7 +10,11 @@ public sealed record LoginCommand(string Email, string Password) : IRequest<Logi
 
 public sealed record LoginResponse(string AccessToken, string TokenType, DateTime ExpiresAtUtc);
 
-public sealed class LoginHandler(ClinicFlowDbContext db, IPasswordHasher<User> passwordHasher, TokenService tokenService)
+public sealed class LoginHandler(
+    ClinicFlowDbContext db,
+    IPasswordHasher<User> passwordHasher,
+    TokenService tokenService,
+    ILogger<LoginHandler> logger)
     : IRequestHandler<LoginCommand, LoginResponse?>
 {
     public async Task<LoginResponse?> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -21,16 +25,20 @@ public sealed class LoginHandler(ClinicFlowDbContext db, IPasswordHasher<User> p
         // Unknown email or wrong password: the same answer (null -> 401), so nobody can probe which emails exist.
         if (user is null)
         {
+            logger.LogWarning("Login failed: unknown email");
             return null;
         }
 
         var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
         if (result == PasswordVerificationResult.Failed)
         {
+            // Never log the password or the token.
+            logger.LogWarning("Login failed: wrong password for user {UserId}", user.Id);
             return null;
         }
 
         var token = tokenService.CreateToken(user);
+        logger.LogInformation("User {UserId} logged in", user.Id);
 
         return new LoginResponse(token.Value, "Bearer", token.ExpiresAtUtc);
     }

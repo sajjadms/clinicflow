@@ -1,5 +1,3 @@
-using ClinicFlow.Api.Infrastructure.Logging;
-
 namespace ClinicFlow.Api.Features.Patients;
 
 public static class PatientEndpoints
@@ -11,6 +9,5 @@ public static class PatientEndpoints
     public static RouteGroupBuilder MapPatientsGroup(this IEndpointRouteBuilder app) =>
         app.MapGroup("/api/patients")
            .WithTags("Patients")
-           .RequireAuthorization()
-           .AddEndpointFilter<RequestTimingFilter>();
+           .RequireAuthorization();
 }

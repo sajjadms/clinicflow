@@ -1,0 +1,28 @@
+2026-11-08 17:29:57.549 [INF] Now listening on: http://localhost:5080 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 17:29:57.848 [INF] Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 17:29:57.854 [INF] Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 17:29:57.857 [INF] Content root path: C:\AcademyWork\ClinicFlow.Api\src\ClinicFlow.Api {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 17:30:27.856 [INF] User "8c1fa995-679c-4b7c-b657-4b5b760231b7" logged in {"SourceContext":"ClinicFlow.Api.Features.Auth.Login.LoginHandler","RequestId":"0HNPTHVELM117:00000001","RequestPath":"/api/auth/login","ConnectionId":"0HNPTHVELM117","Application":"ClinicFlow.Api"}
+2026-11-08 17:30:27.905 [INF] HTTP POST /api/auth/login responded 200 in 6181.2107 ms {"SourceContext":"Serilog.AspNetCore.RequestLoggingMiddleware","RequestId":"0HNPTHVELM117:00000001","ConnectionId":"0HNPTHVELM117","Application":"ClinicFlow.Api"}
+2026-11-08 17:51:15.639 [INF] Now listening on: http://localhost:5080 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 17:51:16.197 [INF] Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 17:51:16.202 [INF] Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 17:51:16.205 [INF] Content root path: C:\AcademyWork\ClinicFlow.Api\src\ClinicFlow.Api {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 17:55:26.591 [INF] User "8c1fa995-679c-4b7c-b657-4b5b760231b7" logged in {"SourceContext":"ClinicFlow.Api.Features.Auth.Login.LoginHandler","RequestId":"0HNPTIDBAQBEK:00000001","RequestPath":"/api/auth/login","ConnectionId":"0HNPTIDBAQBEK","Application":"ClinicFlow.Api"}
+2026-11-08 17:55:26.705 [INF] HTTP POST /api/auth/login responded 200 in 12386.5860 ms {"SourceContext":"Serilog.AspNetCore.RequestLoggingMiddleware","RequestId":"0HNPTIDBAQBEK:00000001","ConnectionId":"0HNPTIDBAQBEK","Application":"ClinicFlow.Api"}
+2026-11-08 18:00:58.962 [INF] Now listening on: http://localhost:5080 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:01:01.104 [INF] Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:01:01.109 [INF] Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:01:01.122 [INF] Content root path: C:\AcademyWork\ClinicFlow.Api\src\ClinicFlow.Api {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:01:56.405 [INF] User "8c1fa995-679c-4b7c-b657-4b5b760231b7" logged in {"SourceContext":"ClinicFlow.Api.Features.Auth.Login.LoginHandler","RequestId":"0HNPTIGV3F0JJ:00000001","RequestPath":"/api/auth/login","ConnectionId":"0HNPTIGV3F0JJ","Application":"ClinicFlow.Api"}
+2026-11-08 18:01:56.509 [INF] HTTP POST /api/auth/login responded 200 in 13820.6181 ms {"SourceContext":"Serilog.AspNetCore.RequestLoggingMiddleware","RequestId":"0HNPTIGV3F0JJ:00000001","ConnectionId":"0HNPTIGV3F0JJ","Application":"ClinicFlow.Api"}
+2026-11-08 18:04:46.697 [INF] Now listening on: http://localhost:5080 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:04:48.269 [INF] Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:04:48.278 [INF] Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:04:48.296 [INF] Content root path: C:\AcademyWork\ClinicFlow.Api\src\ClinicFlow.Api {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:14:47.456 [INF] Now listening on: http://localhost:5080 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:14:50.015 [INF] Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:14:50.018 [INF] Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:14:50.023 [INF] Content root path: C:\AcademyWork\ClinicFlow.Api\src\ClinicFlow.Api {"SourceContext":"Microsoft.Hosting.Lifetime","Application":"ClinicFlow.Api"}
+2026-11-08 18:21:08.130 [INF] HTTP GET /api/nationalities responded 200 in 46642.8543 ms {"SourceContext":"Serilog.AspNetCore.RequestLoggingMiddleware","RequestId":"0HNPTIRC7QLNV:00000001","ConnectionId":"0HNPTIRC7QLNV","Application":"ClinicFlow.Api"}
+2026-11-08 18:21:16.410 [INF] HTTP GET /favicon.ico responded 404 in 37.9947 ms {"SourceContext":"Serilog.AspNetCore.RequestLoggingMiddleware","RequestId":"0HNPTIRC7QLNV:00000002","ConnectionId":"0HNPTIRC7QLNV","Application":"ClinicFlow.Api"}
